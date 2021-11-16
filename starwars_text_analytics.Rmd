@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Text Analytics
@@ -41,7 +43,7 @@ ep4 %>%
 
 We'll tokenize this using tidytext. This enables us to display word counts, with and without stop words.
 
-```{r tokenize example, fig.height=6}
+```{r tokenize example, fig.height=8}
 
 ep4 %>%
         unnest_tokens(word, dialogue) %>%
@@ -74,9 +76,10 @@ ep4 %>%
         facet_wrap(document ~.)
 
 ```
+
 We can similarly do this for each main character.
 
-```{r word count by character, warning=F, message=F, fig.height=6}
+```{r word count by character, warning=F, message=F, fig.height=8}
 
 
 word_counts<- ep4 %>%
@@ -180,7 +183,7 @@ get_sentiments("bing") %>%
 ```
 
 
-```{r ep4 sentiment analysis with bing, fig.height=6}
+```{r ep4 sentiment analysis with bing, fig.height=8}
 
 # get sentiment
 ep4_sentiment<-
@@ -529,7 +532,7 @@ ep4 %>%
         facet_wrap(document+character~.)+
         ylab("average sentiment")+
         xlab("line_number")+
-        geom_smooth()
+        geom_smooth(method = 'loess', formula = 'y ~ x')
         
 ```
 
@@ -561,7 +564,7 @@ ep4 %>%
         facet_wrap(document+character~., ncol=1)+
         ylab("average sentiment")+
         xlab("line_number")+
-        geom_smooth()
+        geom_smooth(method = 'loess', formula = 'y ~ x')
 
 
 # average senitment
@@ -586,7 +589,7 @@ ep4 %>%
         facet_wrap(document+character~., ncol=1)+
         ylab("average sentiment")+
         xlab("line_number")+
-        geom_smooth()
+        geom_smooth(method = 'loess', formula = 'y ~ x')
 
 
 ```
@@ -881,7 +884,7 @@ ep6 %>%
         ylab("average sentiment")+
         xlab("line_number")+
         facet_wrap(character+document~.)+
-        geom_smooth()
+        geom_smooth(method = 'loess', formula = 'y ~ x')
 
 # with the filter
 ep6 %>%
@@ -905,7 +908,7 @@ ep6 %>%
         ylab("average sentiment")+
         xlab("line_number")+
         facet_wrap(character+document~.)+
-        geom_smooth()
+        geom_smooth(method = 'loess', formula = 'y ~ x')
 
 
 ```
@@ -936,7 +939,7 @@ ep6 %>%
         ylab("average sentiment")+
         xlab("line_number")+
         facet_wrap(character+document~.)+
-        geom_smooth()
+        geom_smooth(method = 'loess', formula = 'y ~ x')
 
 
 
