@@ -5,6 +5,7 @@ library(ggthemes)
 library(textdata)
 library(sentimentr)
 library(ggrepel)
+library(ggforce)
 
 # load and set ggplot theme
 source('theme-phil.R')
@@ -60,8 +61,8 @@ add_sentiment = function(data,
                          by = c('document', 'character', 'line_number')) {
         
         data |>
-        sentiment_by(by = by)
-
+                sentiment_by(by = by)
+        
 }
 
 # tokenize and remove stopwords
@@ -117,7 +118,7 @@ starwars_sentiment |>
 # plot running sentiment calculation for luke
 starwars %>%
         filter(document == 'a new hope') |>
-        filter(character== 'LUKE') |>
+        filter(character %in% c('LUKE')) |>
         get_sentences() |>
         add_sentiment(by = c('document', 'character', 'line_number', 'dialogue')) |>
         arrange(line_number) |>
@@ -134,3 +135,57 @@ starwars %>%
         ylab("running total of sentiment")+
         guides(color = 'none')+
         scale_color_gradient2_tableau(oob = scales::squish)
+
+# plot average sentiment overall with uncertainty
+starwars |>
+        filter(document == 'a new hope') |>
+        get_sentences() |>
+        add_sentiment(by = c("document", "character")) |>
+        group_by(document) |>
+        slice_max(order_by = word_count,
+                  n = 30) |>
+        ggplot(aes(x=reorder(character, ave_sentiment),
+                   y=ave_sentiment,
+                   color = ave_sentiment,
+                   ymin = ave_sentiment - 1.96 * sd,
+                   ymax = ave_sentiment + 1.96*sd))+
+        geom_point(aes(size = word_count))+
+        geom_pointrange()+
+        coord_flip()+
+        facet_wrap(document ~.)+
+        scale_color_gradient2_tableau(oob = scales::squish)+
+        guides(color = 'none')+
+        xlab('character')+
+        theme(panel.grid.major = element_blank(),
+              legend.title = element_text(size = 10))+
+        geom_hline(yintercept = 0, linetype = 'dotted')
+
+# plot sentiment by line number by character
+starwars |>
+        filter(document == 'a new hope') |>
+        get_sentences() |>
+        add_sentiment(by = c("document", "line_number", "sentence_id", "character")) |>
+        group_by(document, character) |>
+        mutate(total_word_count = sum(word_count),
+               mean_sentiment = mean(ave_sentiment)) |>
+        nest(data = -c(document, character, total_word_count)) |>
+        group_by(document) |>
+        slice_max(total_word_count,
+                  n =30) |>
+        unnest(data) |> 
+        ggplot(aes(x=reorder(character, mean_sentiment),
+                   y=ave_sentiment,
+                   color = ave_sentiment))+
+        geom_point(aes(size = word_count,
+                       color = ave_sentiment),
+                   alpha = 0.5,
+                   position = ggforce::position_jitternormal(sd_x = 0,
+                                                             sd_y = 0.05))+
+        coord_flip()+
+        facet_wrap(document ~.)+
+        scale_color_gradient2_tableau(oob = scales::squish)+
+        guides(color = 'none')+
+        xlab('character')+
+        theme(panel.grid.major = element_blank(),
+              legend.title = element_text(size = 10))+
+        geom_hline(yintercept = 0, linetype = 'dotted')
