@@ -112,3 +112,25 @@ starwars_sentiment |>
         ylab("character")+
         xlab("sentiment score")+
         facet_wrap(document~.)
+
+# why is this so different?
+# plot running sentiment calculation for luke
+starwars %>%
+        filter(document == 'a new hope') |>
+        filter(character== 'LUKE') |>
+        get_sentences() |>
+        add_sentiment(by = c('document', 'character', 'line_number', 'dialogue')) |>
+        arrange(line_number) |>
+        mutate(row_number = row_number()) |>
+        mutate(dialogue = as.character(dialogue)) |>
+        mutate(show= case_when(abs(ave_sentiment) > .35 ~ dialogue,
+                               TRUE ~ "")) |>
+        mutate(run_sentiment = cumsum(ave_sentiment)) |>
+        ggplot(aes(x=row_number, y=run_sentiment, color = ave_sentiment, label = show)) +
+        geom_line()+
+        geom_label_repel(size=2.5, max.overlaps=30)+
+        facet_wrap(document+character~.)+
+        xlab("line_number")+
+        ylab("running total of sentiment")+
+        guides(color = 'none')+
+        scale_color_gradient2_tableau(oob = scales::squish)
