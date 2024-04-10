@@ -1,0 +1,159 @@
+---
+format: 
+        gfm:
+                message: false
+                warning: false
+                fig-dpi: 300
+                fig-height: 6
+                fig-width: 8
+editor: source
+---
+
+# sentiment analysis for star wars
+
+
+## data
+
+Load packages, functions, and data for analyzing sentiment in the scripts of the original Star Wars trilogy
+
+```{r}
+#| label: setup
+
+# load packages
+library(tidyverse)
+library(tidytext)
+library(ggthemes)
+library(textdata)
+library(sentimentr)
+library(ggrepel)
+library(ggforce)
+library(plotly)
+
+# load and set ggplot theme
+source("src/functions.R")
+
+theme_set(
+        theme_phil()+
+                theme(
+                        strip.text.x = element_text(size = 12)
+                )
+)
+
+# tokenize and remove stopwords
+load_stopwords()
+
+# read in starwars text
+starwars =
+        load_data() |>
+        clean_data()
+
+
+```
+
+
+## sentiment
+
+Calculate sentiment via **sentimentr**.
+
+```{r}
+
+# use sentimentr
+starwars_sentiment = 
+        starwars |>
+        get_sentences()  |>
+        add_sentiment()
+
+```
+
+# sentiment by dialogue
+
+what pieces of dialogue in star wars have the highest average positive/negative sentiment?
+
+## positive
+
+```{r}
+
+starwars_sentiment |>
+        group_by(document, index = line_number %/% 4) |>
+        summarize(sentiment = mean(sentiment),
+                  characters = paste(unique(character), collapse = '\n'),
+                  dialogue = paste(dialogue, collapse = '\n'),
+                  .groups = 'drop') |>
+        select(document, characters, dialogue, sentiment) |>
+        slice_max(sentiment, n = 10) |>
+        mutate_if(is.numeric, round, 2) |>
+        gt::gt()
+
+```
+
+
+## negative
+
+```{r}
+
+starwars_sentiment |>
+        group_by(document, index = line_number %/% 4) |>
+        summarize(sentiment = mean(sentiment),
+                  characters = paste(unique(character), collapse = '\n'),
+                  dialogue = paste(dialogue, collapse = '\n'),
+                  .groups = 'drop') |>
+        select(document, characters, dialogue, sentiment) |>
+        slice_min(sentiment, n = 10) |>
+        mutate_if(is.numeric, round, 2) |>
+        gt::gt()
+
+```
+
+
+# sentiment by character
+
+Plot average sentiment across main speaking roles in the original trilogy.
+
+```{r}
+#| fig-height: 8
+#| fig-width: 8
+
+starwars |>
+        plot_avg_sentiment(
+                top_n = 20,
+                scales = "free_y"
+        )
+```
+
+
+# sentiment by line
+
+Plot running sentiment for a character across the script.
+
+```{r}
+
+# plot sentiment for all characters
+starwars_sentiment |>
+        filter(document == 'a new hope') |>
+        filter(character == 'LUKE') |>
+        plot_character_lines_with_sentiment()
+
+```
+
+
+```{r}
+
+# plot sentiment for all characters
+starwars_sentiment |>
+        filter(document == 'a new hope') |>
+        filter(character == 'HAN') |>
+        plot_character_lines_with_sentiment()
+
+```
+
+
+```{r}
+
+# plot sentiment for all characters
+starwars_sentiment |>
+        filter(document == 'a new hope') |>
+        filter(character == 'LEIA') |>
+        plot_character_lines_with_sentiment()
+
+```
+
