@@ -48,7 +48,7 @@ starwars_sentiment|>
 starwars_sentiment |>
         plot_sentiment_by_line(
                 combine_lines = 4,
-                plotly = T
+                plotly = F
         )
 
 # plot average sentiment by character
