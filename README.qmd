@@ -82,7 +82,8 @@ starwars_sentiment |>
         select(document, characters, dialogue, sentiment) |>
         slice_max(sentiment, n = 10) |>
         mutate_if(is.numeric, round, 2) |>
-        gt::gt()
+        gt::gt() |>
+        gt::as_raw_html()
 
 ```
 
@@ -100,7 +101,8 @@ starwars_sentiment |>
         select(document, characters, dialogue, sentiment) |>
         slice_min(sentiment, n = 10) |>
         mutate_if(is.numeric, round, 2) |>
-        gt::gt()
+        gt::gt() |>
+        gt::as_raw_html()
 
 ```
 
