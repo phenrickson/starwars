@@ -1,6 +1,8 @@
 
 # sentiment analysis for star wars
 
+this project is trying to illustrate git with star wars for people who know star wars but sadly do not know star wars
+
 ## data
 
 Load packages, functions, and data for analyzing sentiment in the
